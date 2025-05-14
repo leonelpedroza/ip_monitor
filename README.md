@@ -58,7 +58,7 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
   
 ## Installation
 1.	Clone the repository:
-2.	git clone https://github.com/yourusername/ip-monitor.git
+2.	git clone https://github.com/leonelpedroza/ip-monitor.git
 3.	cd ip-monitor
 4.	Install dependencies:
 5.	pip install -r requirements.txt
@@ -127,7 +127,7 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 ## Instalación
 
 1.	Clonar el repositorio:
-2.	git clone https://github.com/tunombredeusuario/ip-monitor.git
+2.	git clone https://github.com/leonelpedroza/ip-monitor.git
 3.	cd ip-monitor
 4.	Instalar dependencias:
 5.	pip install -r requirements.txt
