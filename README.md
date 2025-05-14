@@ -63,7 +63,8 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 4.	Install dependencies:
 5.	pip install -r requirements.txt
 6.	Run the application:
-7.	python ip_monitor_gui.py
+7.	python ip_monitor_gui1.pyw
+
 ## Usage
 ## Adding IP Addresses or Domains
 1.	Enter an IP address or domain name in the input field at the top of the application.
@@ -131,7 +132,8 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 4.	Instalar dependencias:
 5.	pip install -r requirements.txt
 6.	Ejecutar la aplicación:
-7.	python ip_monitor_gui.py	
+7.	python ip_monitor_gui1.pyw
+
 ## Uso
 
 ## Añadir direcciones IP o dominios
