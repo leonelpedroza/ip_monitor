@@ -1,6 +1,18 @@
 # IP Monitor 
 English Version
 
+## History
+
+I've been migrating and upgrading network equipment since Genesis, chapter 1, verse 1, and I always routinely run a series of pings from a CMD window in Windows or Linux to see, in real time, when something that should be responding stops responding.
+
+CMD Ping it's effective and practical monitoring. It doesn't require too many reflectors. Especially when an SNMP-type management system is too sophisticated and cumbersome to monitor just a few IP addresses during a maintenance window, and more isn't necessary. But constantly opening command windows and running those four or five pings, aside from taking up space on your monitor, takes seconds. That's how this idea came to me. Nothing sophisticated. A simple glance, and you understand what's happening during your maintenance window with a simple look.
+
+I didn't create this program to perform a lengthy network monitoring process and replace a modern professional management tool. It's just a tool with a Windows interface, nothing too fancy, easy to use, and uncomplicated.
+
+I decided to publish it on GitHub after the LLM (or misnamed IA's), so fashionable today, reorganized and gave me the green light to my old Python program. After reviewing and commenting on the code more professionally, and standardizing it following the PEP 8 – Style Guide for Python Code.
+
+## Introduction
+
 A powerful, lightweight utility for monitoring the status and response times of multiple IP addresses and domains in real-time.
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
