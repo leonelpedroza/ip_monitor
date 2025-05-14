@@ -2,6 +2,9 @@
 English Version
 
 A powerful, lightweight utility for monitoring the status and response times of multiple IP addresses and domains in real-time.
+
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
+
  
 ## Overview
 IP Address Monitor is a Python-based desktop application designed to provide real-time monitoring of network endpoints. It allows users to track connectivity, response times, and performance metrics for multiple IP addresses or domain names simultaneously, with an intuitive graphical interface.
@@ -29,6 +32,8 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 •	**Export statistics** to CSV format for further analysis
 
 •	**Persistent configuration** that saves monitored IPs and settings between sessions
+
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
 
 ## Requirements
 •	Python 3.6 or higher
@@ -72,6 +77,9 @@ ________________________________________
 
 # Monitor de Direcciones IP
 Una utilidad potente y ligera para monitorear el estado y tiempos de respuesta de múltiples direcciones IP y dominios en tiempo real.
+
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
+
  
 ## Descripción general
 Monitor de Direcciones IP es una aplicación de escritorio basada en Python diseñada para proporcionar monitoreo en tiempo real de puntos finales de red. Permite a los usuarios realizar seguimiento de conectividad, tiempos de respuesta y métricas de rendimiento para múltiples direcciones IP o nombres de dominio simultáneamente, con una interfaz gráfica intuitiva.
@@ -91,6 +99,9 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 •	Vista gráfica del historial de rendimiento de ping a lo largo del tiempo
 •	Exportación de estadísticas a formato CSV para análisis adicional
 •	Configuración persistente que guarda las IPs monitoreadas y la configuración entre sesiones
+
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
+
 
 ## Requisitos
 
