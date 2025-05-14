@@ -25,17 +25,18 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 •	**Real-time ping monitoring** of multiple IP addresses and domain names
 
 •	**Visual status indicators** with color-coded rows for quick status assessment: 
-* **Light green:** All pings successful
-* **Light red:** All pings failed
-* **Light yellow:** Mixed results
+  - **Light green:** All pings successful
+  - **Light red:** All pings failed
+  - **Light yellow:** Mixed results
 
 •	**Sound notifications** for status changes (can be toggled for each IP address)
 
 •	**Comprehensive statistics** for each monitored endpoint: 
-*	Fastest response time
-*	Slowest response time
-*	Average response time
-*	Ping history visualization (last 10 pings)
+  -	Fastest response time
+  -	Slowest response time
+  -	Average response time
+
+•	**Ping history visualization** (last 10 pings)
   
 •	**Customizable ping interval** (2-10 seconds between pings)
 
@@ -72,16 +73,16 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 ## Monitoring Controls
 •	**Toggle Sound Notifications:** Click the bell icon for each IP to enable/disable sound alerts when status changes.
 
-•	**Reset Statistics:** Click the "Reset" button for an individual IP or "Reset All Stats" to clear all statistics.
+•	**Reset Statistics:** Click the "_Reset_" button for an individual IP or "_Reset All Stats_" to clear all statistics.
 
-•	**Pause/Resume Monitoring:** Click "Stop" or "Start" for individual IPs, or use "Stop All Pings" / "Start All Pings" for all endpoints.
+•	**Pause/Resume Monitoring:** Click "_Stop_" or "_Start_" for individual IPs, or use "_Stop All Pings" / "Start All Pings_" for all endpoints.
 
-•	**Remove IP:** Click the "Delete" button to remove an IP from monitoring.
+•	**Remove IP:** Click the "_Delete_" button to remove an IP from monitoring.
 
-•	**View Graph:** Click "View Graph" to display a historical graph of ping times.
+•	**View Graph:** Click "_View Graph_" to display a historical graph of ping times.
 
 ## Exporting Data
-•	Use "Reset & Save Stats" to export current statistics to a CSV file with a timestamp.
+•	Use "_Reset & Save Stats_" to export current statistics to a CSV file with a timestamp.
 ## License
 GPL
 ## Contributing
@@ -102,15 +103,22 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 *	Verde claro: Todos los pings exitosos
 *	Rojo claro: Todos los pings fallidos
 *	Amarillo claro: Resultados mixtos
-•	Notificaciones sonoras para cambios de estado (se pueden activar/desactivar para cada dirección IP)
-•	Estadísticas completas para cada punto final monitoreado: 
+
+•	**Notificaciones sonoras** para cambios de estado (se pueden activar/desactivar para cada dirección IP)
+
+•	**Estadísticas completas** para cada punto final monitoreado: 
 *	Tiempo de respuesta más rápido
 *	Tiempo de respuesta más lento
 *	Tiempo de respuesta promedio
+ 
 *	Visualización del historial de ping (últimos 10 pings)
+
 •	Intervalo de ping personalizable (2-10 segundos entre pings)
+
 •	Vista gráfica del historial de rendimiento de ping a lo largo del tiempo
+
 •	Exportación de estadísticas a formato CSV para análisis adicional
+
 •	Configuración persistente que guarda las IPs monitoreadas y la configuración entre sesiones
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
@@ -142,19 +150,19 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 2.	Presione Enter o haga clic en el botón "Add".
 ## Controles de monitoreo
 
-•	Alternar notificaciones de sonido: Haga clic en el icono de campana para cada IP para habilitar/deshabilitar alertas sonoras cuando cambie el estado.
+•	**Alternar notificaciones de sonido:** Haga clic en el icono de campana para cada IP para habilitar/deshabilitar alertas sonoras cuando cambie el estado.
 
-•	Restablecer estadísticas: Haga clic en el botón "Reset" para una IP individual o "Reset All Stats" para borrar todas las estadísticas.
+•	**Restablecer estadísticas:** Haga clic en el botón "_Reset_" para una IP individual o "_Reset All Stats_" para borrar todas las estadísticas.
 
-•	Pausar/Reanudar monitoreo: Haga clic en "Stop" o "Start" para IPs individuales, o use "Stop All Pings" / "Start All Pings" para todos los puntos finales.
+•	**Pausar/Reanudar monitoreo:** Haga clic en "_Stop" o "Start_" para IPs individuales, o use "_Stop All Pings" / "Start All Pings_" para todos los nodos.
 
-•	Eliminar IP: Haga clic en el botón "Delete" para eliminar una IP del monitoreo.
+•	**Eliminar IP:** Haga clic en el botón "_Delete_" para eliminar una IP del monitoreo.
 
-•	Ver gráfico: Haga clic en "View Graph" para mostrar un gráfico histórico de los tiempos de ping.
+•	**Ver gráfico:** Haga clic en _"View Graph_" para mostrar un gráfico histórico de los tiempos de ping.
 
 ## Exportar datos
 
-•	Use "Reset & Save Stats" para exportar las estadísticas actuales a un archivo CSV con una marca de tiempo.
+•	Use "_Reset & Save Stats_" para exportar las estadísticas actuales a un archivo CSV con una marca de tiempo.
 ## Licencia
 GPL
 ## Contribuciones
