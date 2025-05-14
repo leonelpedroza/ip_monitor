@@ -78,44 +78,57 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 ## Características
 •	Monitoreo de ping en tiempo real para múltiples direcciones IP y nombres de dominio
 •	Indicadores visuales de estado con filas codificadas por colores para una evaluación rápida del estado: 
-o	Verde claro: Todos los pings exitosos
-o	Rojo claro: Todos los pings fallidos
-o	Amarillo claro: Resultados mixtos
+*	Verde claro: Todos los pings exitosos
+*	Rojo claro: Todos los pings fallidos
+*	Amarillo claro: Resultados mixtos
 •	Notificaciones sonoras para cambios de estado (se pueden activar/desactivar para cada dirección IP)
 •	Estadísticas completas para cada punto final monitoreado: 
-o	Tiempo de respuesta más rápido
-o	Tiempo de respuesta más lento
-o	Tiempo de respuesta promedio
-o	Visualización del historial de ping (últimos 10 pings)
+*	Tiempo de respuesta más rápido
+*	Tiempo de respuesta más lento
+*	Tiempo de respuesta promedio
+*	Visualización del historial de ping (últimos 10 pings)
 •	Intervalo de ping personalizable (2-10 segundos entre pings)
 •	Vista gráfica del historial de rendimiento de ping a lo largo del tiempo
 •	Exportación de estadísticas a formato CSV para análisis adicional
 •	Configuración persistente que guarda las IPs monitoreadas y la configuración entre sesiones
+
 ## Requisitos
+
 •	Python 3.6 o superior
 •	Paquetes de Python requeridos: 
-o	tkinter (incluido con la mayoría de las instalaciones de Python)
-o	ping3 (pip install ping3)
-o	matplotlib (para visualización gráfica, pip install matplotlib)
+*	tkinter (incluido con la mayoría de las instalaciones de Python)
+*	ping3 (pip install ping3)
+*	matplotlib (para visualización gráfica, pip install matplotlib)
+
 ## Instalación
+
 1.	Clonar el repositorio:
 2.	git clone https://github.com/tunombredeusuario/ip-monitor.git
 3.	cd ip-monitor
 4.	Instalar dependencias:
 5.	pip install -r requirements.txt
 6.	Ejecutar la aplicación:
-7.	python ip_monitor_gui.py
+7.	python ip_monitor_gui.py	
 ## Uso
+
 ## Añadir direcciones IP o dominios
+
 1.	Ingrese una dirección IP o nombre de dominio en el campo de entrada en la parte superior de la aplicación.
 2.	Presione Enter o haga clic en el botón "Add".
 ## Controles de monitoreo
+
 •	Alternar notificaciones de sonido: Haga clic en el icono de campana para cada IP para habilitar/deshabilitar alertas sonoras cuando cambie el estado.
+
 •	Restablecer estadísticas: Haga clic en el botón "Reset" para una IP individual o "Reset All Stats" para borrar todas las estadísticas.
+
 •	Pausar/Reanudar monitoreo: Haga clic en "Stop" o "Start" para IPs individuales, o use "Stop All Pings" / "Start All Pings" para todos los puntos finales.
+
 •	Eliminar IP: Haga clic en el botón "Delete" para eliminar una IP del monitoreo.
+
 •	Ver gráfico: Haga clic en "View Graph" para mostrar un gráfico histórico de los tiempos de ping.
+
 ## Exportar datos
+
 •	Use "Reset & Save Stats" para exportar las estadísticas actuales a un archivo CSV con una marca de tiempo.
 ## Licencia
 GPL
