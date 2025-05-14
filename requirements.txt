@@ -1,0 +1,2 @@
+ping3>=1.7.0
+matplotlib>=3.5.0
