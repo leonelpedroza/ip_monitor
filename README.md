@@ -10,9 +10,9 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 •	**Real-time ping monitoring** of multiple IP addresses and domain names
 
 •	**Visual status indicators** with color-coded rows for quick status assessment: 
-* Light green: All pings successful
-*	Light red: All pings failed
-*	Light yellow: Mixed results
+* **Light green:** All pings successful
+* **Light red:** All pings failed
+* **Light yellow:** Mixed results
 
 •	**Sound notifications** for status changes (can be toggled for each IP address)
 
