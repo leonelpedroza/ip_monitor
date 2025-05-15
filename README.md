@@ -1,7 +1,7 @@
 # IP Monitor 
 English Version
-
-## History
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/UKFlag.png)
+## History 
 
 I've been migrating and upgrading network equipment since Genesis, chapter 1, verse 1, and I always routinely run a series of pings from a CMD window in Windows or Linux to see, in real time, when something that should be responding stops responding.
 
@@ -36,15 +36,15 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
   -	Slowest response time
   -	Average response time
 
-•	**Ping history visualization** (last 10 pings)
+•	**Ping history visualization** (last 10 pings).
   
-•	**Customizable ping interval** (2-10 seconds between pings)
+•	**Customizable ping interval** (2-10 seconds between pings).
 
-•	**Graphical history view** of ping performance over time
+•	**Graphical history view** of ping performance over time.
 
-•	**Export statistics** to CSV format for further analysis
+•	**Export statistics** to CSV format for further analysis.
 
-•	**Persistent configuration** that saves monitored IPs and settings between sessions
+•	**Persistent configuration** that saves monitored IPs and settings between.sessions
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
 
@@ -53,9 +53,9 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 
 •	Required Python packages: 
 
-*	tkinter (included with most Python installations)
-*	ping3 (pip install ping3)
-*	matplotlib (for graph visualization, pip install matplotlib)
+*	**tkinter** (included with most Python installations)
+*	**ping3** (pip install ping3)
+*	**matplotlib** (for graph visualization, pip install matplotlib)
   
 ## Installation
 1.	Clone the repository:
@@ -90,19 +90,35 @@ Contributions, issues, and feature requests are welcome. Feel free to check the 
 ________________________________________
 
 # Monitor de Direcciones IP
+Español
+![](https://github.com/leonelpedroza/ip_monitor/blob/main/SpainFlag.png)
+## Historia  
+
+
+He estado migrando y actualizando equipos de red desde el Génesis, capítulo 1, versículo 1, y siempre ejecuto una serie de pings desde una ventana de CMD en Windows o Linux para ver, en tiempo real, cuándo algo que debería estar respondiendo, deja de hacerlo.
+
+El uso del comando CMD Ping es un monitoreo muy básico, eficaz y práctico. No requiere nada fuera de lo común, y es especialmente útil cuando un sistema de gestión tipo SNMP es demasiado sofisticado y engorroso para monitorizar solo unas pocas direcciones IP durante una ventana de mantenimiento, y no se necesitan más. Pero abrir constantemente ventanas de comandos y ejecutar esos cuatro o cinco pings, además de ocupar espacio en el monitor, toma segundos. Así surgió esta idea. Nada sofisticado. Con un simple vistazo, se entiende lo que está sucediendo durante la ventana de mantenimiento.
+
+No creé este programa para realizar un largo proceso de monitorización de red ni para reemplazar una herramienta de gestión profesional moderna. Es simplemente una herramienta con interfaz de Windows, sencilla, fácil de usar y sin complicaciones.
+
+Decidí publicarlo en GitHub después de que el LLM (o mal llamado IA), tan de moda hoy en día, lo reorganizara y me diera luz verde para mi antiguo programa de Python, tras revisar y comentar el código de forma más profesional, y estandarizarlo siguiendo la PEP 8: Guía de Estilo para Código Python.
+
+
+
+## Introducción
 Una utilidad potente y ligera para monitorear el estado y tiempos de respuesta de múltiples direcciones IP y dominios en tiempo real.
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
 
  
 ## Descripción general
-Monitor de Direcciones IP es una aplicación de escritorio basada en Python diseñada para proporcionar monitoreo en tiempo real de puntos finales de red. Permite a los usuarios realizar seguimiento de conectividad, tiempos de respuesta y métricas de rendimiento para múltiples direcciones IP o nombres de dominio simultáneamente, con una interfaz gráfica intuitiva.
+**IP Monitor** es una aplicación de escritorio basada en Python y diseñada para proporcionar monitoreo en tiempo real de puntos finales de red. Permite a los usuarios realizar seguimiento de conectividad, tiempos de respuesta y métricas de rendimiento para múltiples direcciones IP o nombres de dominio simultáneamente, con una interfaz gráfica intuitiva.
 ## Características
-•	Monitoreo de ping en tiempo real para múltiples direcciones IP y nombres de dominio
-•	Indicadores visuales de estado con filas codificadas por colores para una evaluación rápida del estado: 
-*	Verde claro: Todos los pings exitosos
-*	Rojo claro: Todos los pings fallidos
-*	Amarillo claro: Resultados mixtos
+•	**Monitoreo de ping en tiempo real** para múltiples direcciones IP y nombres de dominio
+•	**Indicadores visuales de estado** con filas codificadas por colores para una evaluación rápida del estado: 
+*	**Verde claro:** Todos los pings exitosos
+*	**Rojo claro:** Todos los pings fallidos
+*	**Amarillo claro:** Resultados mixtos
 
 •	**Notificaciones sonoras** para cambios de estado (se pueden activar/desactivar para cada dirección IP)
 
@@ -128,9 +144,9 @@ Monitor de Direcciones IP es una aplicación de escritorio basada en Python dise
 
 •	Python 3.6 o superior
 •	Paquetes de Python requeridos: 
-*	tkinter (incluido con la mayoría de las instalaciones de Python)
-*	ping3 (pip install ping3)
-*	matplotlib (para visualización gráfica, pip install matplotlib)
+*	**tkinter** (incluido con la mayoría de las instalaciones de Python)
+*	**ping3** (pip install ping3)
+*	**matplotlib** (para visualización gráfica, pip install matplotlib)
 
 ## Instalación
 
