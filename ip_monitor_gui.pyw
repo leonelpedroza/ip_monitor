@@ -1,19 +1,19 @@
 # ip_monitor_gui.pyw
 '''
 ***************************************************************************
- ip_monitor_guy.pyw               Nombre del archivo
+ ip_monitor_gui.pyw               File name
 
  Description: Simple ICMP monitoring tool
 
- Usage: python ip_monitor_guy.pyw 
+ Usage: python ip_monitor_gui.pyw 
 
- @since version 1.1 
+ @since version 1.2 
  @return <typnone>
- @Date: GitHub version - May 13 2025 / Spaghetti code version - June 2020
+ @Date: GitHub version - May 15 2025 / Spaghetti code version - June 2020
 ****************************************************************************
 '''
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import threading
 import time
 import json
@@ -65,8 +65,8 @@ except ImportError:
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 LOG_FILE = f"ping_log_{log_timestamp}.csv"
 SAVE_FILE = "ips.json"
-DEFAULT_PING_INTERVAL = 2  # Default seconds between pings
-MAX_HISTORY = 10    # Number of ping history entries to display - increased from 8 to 10
+DEFAULT_PING_INTERVAL = 3  # Default seconds between pings
+MAX_HISTORY = 10    # Number of ping history entries to display
 # Global ping interval value
 PING_INTERVAL = DEFAULT_PING_INTERVAL
 
@@ -74,21 +74,25 @@ class IPMonitorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("IP Address Monitor")
-        self.root.geometry("1000x600")
+        self.root.geometry("1025x600")
         self.root.minsize(600, 400)
         
         # Set application icon from Base64 data
         icondata = '''
         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
         '''
-        icon = tk.PhotoImage(data=icondata)
-        self.root.iconphoto(True, icon)
+        try:
+            icon = tk.PhotoImage(data=icondata)
+            self.root.iconphoto(True, icon)
+        except Exception as e:
+            print(f"Warning: Could not set icon: {e}")
 
         self.ping_threads = []
         self.stop_event = threading.Event()
         self.rows = []
         self.logging_enabled = tk.BooleanVar(value=True)
         self.monitoring_paused = False
+        self.selected_row = None  # Initialize selected_row attribute
 
         # Ping interval variable
         self.ping_interval = tk.IntVar(value=DEFAULT_PING_INTERVAL)
@@ -97,9 +101,12 @@ class IPMonitorApp:
         self.create_widgets()
         self.initialize_log_file()
         
-        # Load settings first, then IPs
+        # Load settings only (no IPs) - CHANGE 1: Don't load IPs automatically
         self.load_settings()
-        self.load_ips()
+        
+        # Set up unsaved changes flag
+        self.has_unsaved_changes = False
+        
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_widgets(self):
@@ -173,7 +180,7 @@ class IPMonitorApp:
         
         columns = [
             ("IP/URL Address", 14, "w"),       # IP address column
-            ("Last 10 Pings", 24, "center"),    # History circles column - updated from "Last 8 Pings" and increased width
+            ("Last 10 Pings", 24, "center"),    # History circles column
             ("Fastest", 8, "center"),          # Fastest ping column
             ("Slowest", 10, "center"),         # Slowest ping column
             ("Average", 8, "center"),          # Average ping column
@@ -361,7 +368,9 @@ class IPMonitorApp:
 
         # Clear entry field
         self.ip_entry.delete(0, tk.END)
-        self.save_ips()  # Save immediately after adding
+        
+        # CHANGE 2: Set unsaved changes flag to true
+        self.has_unsaved_changes = True
 
     def select_row(self, row):
         """Select a row and highlight it"""
@@ -382,7 +391,7 @@ class IPMonitorApp:
         # File menu
         file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="Save IP List", command=self.save_ips)
+        file_menu.add_command(label="Save IP List", command=self.save_ips_as)  # CHANGE 3: Changed to save_ips_as
         file_menu.add_command(label="Load IP List", command=self.load_ips)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.on_closing)
@@ -417,6 +426,9 @@ class IPMonitorApp:
         # The row's sound_notifications_enabled variable handles the state
         # Just update the bell icon appearance
         row.update_bell_icon()
+        
+        # CHANGE 4: Set unsaved changes flag
+        self.has_unsaved_changes = True
 
     def copy_to_clipboard(self, text):
         self.root.clipboard_clear()
@@ -429,7 +441,9 @@ class IPMonitorApp:
             row.separator.destroy()  # Remove separator
         row.frame.destroy()
         self.rows.remove(row)
-        self.save_ips()  # Save immediately after removal
+        
+        # CHANGE 5: Set unsaved changes flag
+        self.has_unsaved_changes = True
 
     def toggle_all_pings(self):
         """Toggle between stopping and starting all pings"""
@@ -519,12 +533,8 @@ class IPMonitorApp:
                 # Clear the rows list
                 self.rows.clear()
                 
-                # Delete the saved JSON file if it exists
-                if os.path.exists(SAVE_FILE):
-                    try:
-                        os.remove(SAVE_FILE)
-                    except Exception as e:
-                        print(f"Warning: Failed to delete saved IPs file: {e}")
+                # CHANGE 6: Set unsaved changes flag to false since we've cleared everything
+                self.has_unsaved_changes = False
                 
                 # Reset monitoring state
                 self.monitoring_paused = False
@@ -541,8 +551,12 @@ class IPMonitorApp:
     def restart_program(self):
         """Restart the entire application"""
         if messagebox.askyesno("Restart", "Are you sure you want to restart the application?"):
-            # Save current state
-            self.save_ips()
+            # Ask to save changes if needed
+            if self.has_unsaved_changes and messagebox.askyesno("Save Changes", 
+                                                               "Do you want to save the current IP list before restarting?"):
+                if not self.save_ips_as():
+                    # User cancelled the save operation
+                    return
             
             # Close the current window
             self.root.destroy()
@@ -556,15 +570,46 @@ class IPMonitorApp:
                 messagebox.showerror("Restart Error", f"Failed to restart program: {e}")
                 # Continue running if restart fails
 
+    # CHANGE 7: Modified to prompt for saving before closing
     def on_closing(self):
+        """Handle application closing, asking to save IP list if needed"""
+        # Ask to save changes if there are unsaved changes
+        if self.has_unsaved_changes:
+            response = messagebox.askyesnocancel("Save Changes", 
+                                       "Do you want to save the current IP list before exiting?")
+            
+            if response is None:  # Cancel was clicked
+                return  # Don't close the application
+            
+            if response:  # Yes was clicked
+                # Try to save, and only exit if save was successful
+                if not self.save_ips_as():
+                    return  # User cancelled the save dialog
+        
+        # Stop all monitoring threads
         self.stop_event.set()
-        self.save_ips()
+        
+        # Destroy the main window and exit
         self.root.destroy()
 
-    def save_ips(self):
-        global SAVE_FILE
+    # CHANGE 8: New method to ask for filename when saving
+    def save_ips_as(self):
+        """Save IP addresses to a user-specified file"""
+        # Ask user for filename
+        filetypes = [("JSON files", "*.json"), ("All files", "*.*")]
+        save_path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=filetypes,
+            initialfile="ip_list.json",
+            title="Save IP List As"
+        )
+        
+        # If user cancelled the dialog
+        if not save_path:
+            return False
+            
+        # Save IP addresses along with their notification settings
         try:
-            # Save IP addresses along with their notification settings
             ips_data = []
             for row in self.rows:
                 ips_data.append({
@@ -572,48 +617,102 @@ class IPMonitorApp:
                     "notifications": row.sound_notifications_enabled.get()
                 })
             
-            try:
-                with open(SAVE_FILE, "w") as f:
-                    json.dump(ips_data, f)
-            except PermissionError:
-                # Try with a different filename if permission denied
-                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-                alt_filename = f"ips_{timestamp}.json"
-                with open(alt_filename, "w") as f:
-                    json.dump(ips_data, f)
-                print(f"IP data saved to alternative file: {alt_filename}")
-                # Update the global SAVE_FILE variable
-                SAVE_FILE = alt_filename
+            with open(save_path, "w") as f:
+                json.dump(ips_data, f)
+                
+            # Update the global SAVE_FILE variable to the last used file
+            global SAVE_FILE
+            SAVE_FILE = save_path
+            
+            # Reset unsaved changes flag
+            self.has_unsaved_changes = False
+            
+            messagebox.showinfo("Success", f"IP list saved to {save_path}")
+            return True
+            
         except Exception as e:
             messagebox.showerror("Save Error", f"Failed to save IP addresses: {e}")
+            return False
 
+    # CHANGE 9: Updated to ask whether to overwrite or add to current list
     def load_ips(self):
+        """Load IP addresses from a file with option to overwrite or add"""
+        # Ask user for file to load
+        filetypes = [("JSON files", "*.json"), ("All files", "*.*")]
+        load_path = filedialog.askopenfilename(
+            filetypes=filetypes,
+            title="Load IP List"
+        )
+        
+        # If user cancelled the dialog
+        if not load_path:
+            return False
+            
+        # Check if there are any existing IPs being monitored
+        if self.rows and not self.has_unsaved_changes:
+            # No unsaved changes, so just clear existing rows
+            should_replace = True
+        elif self.rows:
+            # Ask if user wants to replace or add
+            response = messagebox.askyesnocancel("Load IP List", 
+                "Do you want to replace the current IP list?\n\n"
+                "Yes = Replace current list\n"
+                "No = Add to current list\n"
+                "Cancel = Abort operation")
+                
+            if response is None:  # User clicked Cancel
+                return False
+                
+            should_replace = response  # True for replace, False for add
+        else:
+            # No existing rows, just load the file
+            should_replace = True
+            
         try:
-            # If no parameter is passed, load from default file
-            if os.path.exists(SAVE_FILE):
-                with open(SAVE_FILE, "r") as f:
-                    ips_data = json.load(f)
-                    
-                    # Check if it's the new format or old format
-                    if isinstance(ips_data, list):
-                        if isinstance(ips_data[0], dict) if ips_data else False:
-                            # New format with dictionaries
-                            for ip_data in ips_data:
-                                ip = ip_data.get("ip", "")
-                                if ip:
-                                    self.add_ip(ip)
-                                    # Set notification settings if available
-                                    if "notifications" in ip_data and self.rows:
-                                        last_row = self.rows[-1]
-                                        last_row.sound_notifications_enabled.set(ip_data["notifications"])
-                                        last_row.update_bell_icon()
-                        else:
-                            # Old format with just IP strings
-                            for ip in ips_data:
-                                self.add_ip(ip)
+            with open(load_path, "r") as f:
+                ips_data = json.load(f)
+                
+            # Clear existing rows if replacing
+            if should_replace and self.rows:
+                for row in self.rows[:]:  # Create a copy of the list to iterate over
+                    row.stop_event.set()
+                    if hasattr(row, 'separator'):
+                        row.separator.destroy()
+                    row.frame.destroy()
+                
+                # Clear the rows list
+                self.rows.clear()
+                
+            # Add IPs from file
+            if isinstance(ips_data, list):
+                if len(ips_data) > 0 and isinstance(ips_data[0], dict):
+                    # New format with dictionaries
+                    for ip_data in ips_data:
+                        ip = ip_data.get("ip", "")
+                        if ip:
+                            self.add_ip(ip)
+                            # Set notification settings if available
+                            if "notifications" in ip_data and self.rows:
+                                last_row = self.rows[-1]
+                                last_row.sound_notifications_enabled.set(ip_data["notifications"])
+                                last_row.update_bell_icon()
+                else:
+                    # Old format with just IP strings
+                    for ip in ips_data:
+                        self.add_ip(ip)
+                        
+            # Update global SAVE_FILE variable
+            global SAVE_FILE
+            SAVE_FILE = load_path
+            
+            # Reset unsaved changes flag since we just loaded
+            self.has_unsaved_changes = False
+            
+            messagebox.showinfo("Success", f"IP list loaded from {load_path}")
             return True
+            
         except Exception as e:
-            messagebox.showerror("Load Error", f"Failed to load saved IP addresses: {e}")
+            messagebox.showerror("Load Error", f"Failed to load IP addresses: {e}")
             return False
 
     def show_ping_graph(self):
@@ -917,6 +1016,10 @@ class IPRow:
         self.sound_notifications_enabled.set(not self.sound_notifications_enabled.get())
         self.update_bell_icon()
         
+        # Mark changes as unsaved if parent app exists
+        if hasattr(self, 'parent_app') and self.parent_app:
+            self.parent_app.has_unsaved_changes = True
+        
     def update_bell_icon(self):
         """Update the bell icon appearance based on notification state"""
         if self.sound_notifications_enabled.get():
@@ -928,11 +1031,12 @@ class IPRow:
             self.bell_canvas.itemconfig(self.bell_icon, fill="gray", font=("Arial", 12))
             self.bell_canvas.tooltip.text = "Sound notifications disabled"
 
+    # CHANGE 10: Modified to better handle the bell notification for every ping status change
     def update_display(self, result):
         # Determine current status
-        current_status = True if result else False if result is None else None
+        current_status = True if result else False
         
-        # Check if there's a change in status
+        # Check if there's a change in status regardless of history
         status_changed = self.prev_status is not None and current_status != self.prev_status
         
         # Play sound if notifications are enabled and status changed
@@ -948,6 +1052,7 @@ class IPRow:
         # Store current status for next comparison
         self.prev_status = current_status
         
+        # Update history and statistics
         if result is None:
             self.history.insert(0, False)
         else:
@@ -1001,7 +1106,7 @@ class IPRow:
             self.slow_label.config(text="-")
             self.avg_label.config(text="-")
             
-        # Update label color based on the last 8 pings
+        # Update label color based on the last pings
         self.update_label_color()
 
     def update_label_color(self):
@@ -1011,7 +1116,7 @@ class IPRow:
             self.set_row_background("SystemButtonFace")  # Use system default color instead of empty string
             return
             
-        # Check if there are 10 valid entries in history (updated from 8)
+        # Check if there are 10 valid entries in history
         valid_entries = [h for h in self.history if h is not None]
         if len(valid_entries) < MAX_HISTORY:
             # Not enough data yet
