@@ -12,7 +12,7 @@ I didn't create this program to perform a lengthy network monitoring process and
 I decided to publish it on GitHub after the LLM (or misnamed IA's), so fashionable today, reorganized and gave me the green light to my old Python program. After reviewing and commenting on the code more professionally, and standardizing it following the PEP 8 – Style Guide for Python Code.
 
 ## Introduction
-
+<img align="right" width="180" src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
 A powerful, lightweight utility for monitoring the status and response times of multiple IP addresses and domains in real-time.
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
@@ -106,6 +106,7 @@ Decidí publicarlo en GitHub después de que el LLM (o mal llamado IA), tan de m
 
 
 ## Introducción
+<img align="right" width="180" src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
 Una utilidad potente y ligera para monitorear el estado y tiempos de respuesta de múltiples direcciones IP y dominios en tiempo real.
 
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
