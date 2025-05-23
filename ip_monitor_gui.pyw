@@ -93,6 +93,7 @@ class IPMonitorApp:
         self.logging_enabled = tk.BooleanVar(value=True)
         self.monitoring_paused = False
         self.selected_row = None  # Initialize selected_row attribute
+        self.log_error_shown = False  # Track if we've shown a log error
 
         # Ping interval variable
         self.ping_interval = tk.IntVar(value=DEFAULT_PING_INTERVAL)
@@ -302,7 +303,13 @@ class IPMonitorApp:
                 return
         
         # If we reached here, we couldn't create a log file after multiple attempts
-        print("Warning: Could not create log file after multiple attempts. Logging disabled.")
+        print("Warning: Could not create log file after multiple attempts.")
+        # Show warning to user
+        if not self.log_error_shown:
+            self.log_error_shown = True
+            messagebox.showwarning("Log File Error", 
+                "Could not create log file. Logging will be disabled.\n"
+                "Please check write permissions in the application directory.")
         self.logging_enabled.set(False)
 
     def validate_ip_or_url(self, address):
@@ -345,7 +352,7 @@ class IPMonitorApp:
                 return
 
         # Create new IP row
-        row = IPRow(self.display_frame, address, self.stop_event, self.logging_enabled, self.ping_interval)
+        row = IPRow(self.display_frame, address, self.stop_event, self.logging_enabled, self.ping_interval, self)
         row.parent_app = self  # Set reference to parent app
         self.rows.append(row)
         row.frame.pack(fill="x", pady=3)
@@ -926,7 +933,7 @@ class IPMonitorApp:
 
 
 class IPRow:
-    def __init__(self, parent, ip, global_stop_event, logging_enabled, ping_interval=None):
+    def __init__(self, parent, ip, global_stop_event, logging_enabled, ping_interval, app):
         """Initialize a row for monitoring an IP or URL"""
         self.ip = ip
         self.history = [None] * MAX_HISTORY
@@ -939,8 +946,10 @@ class IPRow:
         self.logging_enabled = logging_enabled
         self.paused = False
         self.pause_event = threading.Event()
-        self.parent_app = None  # Will be set by the parent app
+        self.parent_app = app  # Store reference to parent app
         self.ping_interval = ping_interval  # Reference to the global ping interval
+        self.log_error_count = 0  # Track consecutive log errors
+        self.max_log_errors = 3  # Maximum consecutive errors before showing warning
         
         # Previous status for detecting changes (for notifications)
         self.prev_status = None
@@ -1186,7 +1195,10 @@ class IPRow:
                             "ok" if result else "fail",
                             f"{result*1000:.2f}" if result else "0"
                         ])
+                    # Reset error count on successful write
+                    self.log_error_count = 0
                 except PermissionError:
+                    self.log_error_count += 1
                     # If permission denied, try to create a new log file
                     try:
                         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_alt"
@@ -1209,11 +1221,20 @@ class IPRow:
                                 "ok" if result else "fail",
                                 f"{result*1000:.2f}" if result else "0"
                             ])
+                        # Reset error count on successful recovery
+                        self.log_error_count = 0
                     except Exception as e:
-                        # If we still can't write, just disable logging
+                        # If we still can't write, show warning but DON'T disable logging
                         print(f"Error writing to log file: {e}")
-                        if hasattr(self, 'parent_app') and self.parent_app:
-                            self.parent_app.logging_enabled.set(False)
+                        if self.log_error_count >= self.max_log_errors:
+                            # Show warning after multiple failures
+                            if hasattr(self, 'parent_app') and self.parent_app and not self.parent_app.log_error_shown:
+                                self.parent_app.log_error_shown = True
+                                # Show error in main thread
+                                self.frame.after(0, lambda: messagebox.showwarning("Log File Error", 
+                                    f"Cannot write to log file for {self.ip}.\n"
+                                    "Check file permissions or disk space.\n"
+                                    "Logging remains enabled but may not be working."))
                 except Exception as e:
                     print(f"Error writing to log file: {e}")
 
@@ -1259,6 +1280,7 @@ class IPRow:
         self.total_time = 0
         self.ping_count = 0
         self.prev_status = None  # Reset status tracking for notifications
+        self.log_error_count = 0  # Reset log error count
         
         # Reset UI indicators
         for canvas in self.circles:
