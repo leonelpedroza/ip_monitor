@@ -1,4 +1,5 @@
 # IP Monitor 
+
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.7+-blue.svg" alt="Python Version">
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-green.svg" alt="Platform">
@@ -8,9 +9,11 @@
   <img src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
 </p>
 
+##
 
 English Version
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/UKFlag.png)
+
 ## History 
 
 I've been migrating and upgrading network equipment since Genesis, chapter 1, verse 1, and I always routinely run a series of pings from a CMD window in Windows or Linux to see, in real time, when something that should be responding stops responding.
