@@ -3,13 +3,13 @@
 ***************************************************************************
  ip_monitor_gui.pyw               File name
 
- Description: Simple ICMP monitoring tool
+ Description: Simple ICMP monitoring tool with reordering support
 
  Usage: python ip_monitor_gui.pyw 
 
- @since version 1.2 
+ @since version 1.3 
  @return <typnone>
- @Date: GitHub version - May 15 2025 / Spaghetti code version - June 2020
+ @Date: GitHub version - June 2025 / Added reordering support
 ****************************************************************************
 '''
 import tkinter as tk
@@ -65,7 +65,7 @@ except ImportError:
 log_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 LOG_FILE = f"ping_log_{log_timestamp}.csv"
 SAVE_FILE = "ips.json"
-DEFAULT_PING_INTERVAL = 3  # Default seconds between pings
+DEFAULT_PING_INTERVAL = 2  # Default seconds between pings
 MAX_HISTORY = 10    # Number of ping history entries to display
 # Global ping interval value
 PING_INTERVAL = DEFAULT_PING_INTERVAL
@@ -93,7 +93,6 @@ class IPMonitorApp:
         self.logging_enabled = tk.BooleanVar(value=True)
         self.monitoring_paused = False
         self.selected_row = None  # Initialize selected_row attribute
-        self.log_error_shown = False  # Track if we've shown a log error
 
         # Ping interval variable
         self.ping_interval = tk.IntVar(value=DEFAULT_PING_INTERVAL)
@@ -109,6 +108,10 @@ class IPMonitorApp:
         self.has_unsaved_changes = False
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+        # Bind window resize event
+        self.root.bind("<Configure>", self.on_window_resize)
+        self.resize_timer = None
 
     def create_widgets(self):
         # Top frame for input controls
@@ -124,6 +127,27 @@ class IPMonitorApp:
 
         add_button = ttk.Button(top_frame, text="Add", command=self.add_ip)
         add_button.pack(side="left", padx=(10, 0))
+        
+        # Add Ping Interval spinner next to Add button
+        ping_interval_frame = ttk.Frame(top_frame)
+        ping_interval_frame.pack(side="left", padx=(20, 0))
+        
+        ttk.Label(ping_interval_frame, text="Interval (sec):").pack(side="left")
+        
+        # Spinner for ping interval - using width=3 as requested
+        spin_interval = ttk.Spinbox(
+            ping_interval_frame, 
+            from_=2, 
+            to=10, 
+            textvariable=self.ping_interval,
+            width=3,
+            command=self.update_ping_interval,
+            wrap=True
+        )
+        spin_interval.pack(side="left", padx=5)
+        # Make sure the entered value is valid with validation
+        spin_interval.bind("<FocusOut>", self.validate_ping_interval)
+        spin_interval.bind("<Return>", self.validate_ping_interval)
 
         # Control buttons frame
         control_frame = ttk.Frame(self.root)
@@ -153,27 +177,12 @@ class IPMonitorApp:
 
         # Add a Clear All IPs button
         tk.Button(buttons_frame1, text="Reset & Save Stats", command=self.clear_all_ips, **button_style).pack(side="left", padx=5)
-
-        # Add Ping Interval spinner to the right side
-        ping_interval_frame = ttk.Frame(buttons_frame1)
-        ping_interval_frame.pack(side="right", padx=10)
         
-        ttk.Label(ping_interval_frame, text="Interval (sec):").pack(side="left")
-        
-        # Spinner for ping interval - using width=3 as requested
-        spin_interval = ttk.Spinbox(
-            ping_interval_frame, 
-            from_=2, 
-            to=10, 
-            textvariable=self.ping_interval,
-            width=3,
-            command=self.update_ping_interval,
-            wrap=True
-        )
-        spin_interval.pack(side="left", padx=5)
-        # Make sure the entered value is valid with validation
-        spin_interval.bind("<FocusOut>", self.validate_ping_interval)
-        spin_interval.bind("<Return>", self.validate_ping_interval)
+        # Add Toggle Pie Charts button
+        self.show_pie_charts = tk.BooleanVar(value=False)  # Default to False (hidden)
+        self.pie_toggle_button = tk.Button(buttons_frame1, text="Show Pie Charts", 
+                                         command=self.toggle_pie_charts, **button_style)
+        self.pie_toggle_button.pack(side="left", padx=5)
 
         # Header frame
         header_frame = ttk.Frame(self.root)
@@ -213,6 +222,13 @@ class IPMonitorApp:
         
         self.canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+        
+        # Create frame for pie charts
+        self.pie_frame = ttk.Frame(self.root)
+        # Don't pack it initially since show_pie_charts defaults to False
+        
+        # Initialize pie charts list
+        self.pie_charts = []
 
     def validate_ping_interval(self, event=None):
         """Validate and correct the ping interval if needed"""
@@ -303,13 +319,7 @@ class IPMonitorApp:
                 return
         
         # If we reached here, we couldn't create a log file after multiple attempts
-        print("Warning: Could not create log file after multiple attempts.")
-        # Show warning to user
-        if not self.log_error_shown:
-            self.log_error_shown = True
-            messagebox.showwarning("Log File Error", 
-                "Could not create log file. Logging will be disabled.\n"
-                "Please check write permissions in the application directory.")
+        print("Warning: Could not create log file after multiple attempts. Logging disabled.")
         self.logging_enabled.set(False)
 
     def validate_ip_or_url(self, address):
@@ -352,7 +362,7 @@ class IPMonitorApp:
                 return
 
         # Create new IP row
-        row = IPRow(self.display_frame, address, self.stop_event, self.logging_enabled, self.ping_interval, self)
+        row = IPRow(self.display_frame, address, self.stop_event, self.logging_enabled, self.ping_interval)
         row.parent_app = self  # Set reference to parent app
         self.rows.append(row)
         row.frame.pack(fill="x", pady=3)
@@ -378,6 +388,9 @@ class IPMonitorApp:
         
         # CHANGE 2: Set unsaved changes flag to true
         self.has_unsaved_changes = True
+        
+        # Update pie charts
+        self.update_pie_charts()
 
     def select_row(self, row):
         """Select a row and highlight it"""
@@ -426,7 +439,60 @@ class IPMonitorApp:
         menu.add_checkbutton(label="Sound Notifications", 
                            variable=row.sound_notifications_enabled,
                            command=lambda: self.toggle_sound_notifications(row))
+        menu.add_separator()
+        # Add move up/down options
+        row_index = self.rows.index(row)
+        if row_index > 0:
+            menu.add_command(label="Move Up", command=lambda: self.move_row_up(row))
+        if row_index < len(self.rows) - 1:
+            menu.add_command(label="Move Down", command=lambda: self.move_row_down(row))
         menu.tk_popup(event.x_root, event.y_root)
+
+    def move_row_up(self, row):
+        """Move a row up in the list"""
+        index = self.rows.index(row)
+        if index > 0:
+            # Swap in the rows list
+            self.rows[index], self.rows[index-1] = self.rows[index-1], self.rows[index]
+            
+            # Redraw all rows
+            self.redraw_all_rows()
+            
+            # Set unsaved changes flag
+            self.has_unsaved_changes = True
+            
+            # Update pie charts
+            self.update_pie_charts()
+            
+            # Update pie charts
+            self.update_pie_charts()
+
+    def move_row_down(self, row):
+        """Move a row down in the list"""
+        index = self.rows.index(row)
+        if index < len(self.rows) - 1:
+            # Swap in the rows list
+            self.rows[index], self.rows[index+1] = self.rows[index+1], self.rows[index]
+            
+            # Redraw all rows
+            self.redraw_all_rows()
+            
+            # Set unsaved changes flag
+            self.has_unsaved_changes = True
+
+    def redraw_all_rows(self):
+        """Redraw all rows in the correct order"""
+        # First, forget all row frames and separators
+        for row in self.rows:
+            row.frame.pack_forget()
+            if hasattr(row, 'separator'):
+                row.separator.pack_forget()
+        
+        # Now pack them again in the correct order
+        for row in self.rows:
+            row.frame.pack(fill="x", pady=3)
+            if hasattr(row, 'separator'):
+                row.separator.pack(fill="x", pady=2)
 
     def toggle_sound_notifications(self, row):
         """Toggle sound notifications for a specific row"""
@@ -451,6 +517,12 @@ class IPMonitorApp:
         
         # CHANGE 5: Set unsaved changes flag
         self.has_unsaved_changes = True
+        
+        # Update pie charts
+        self.update_pie_charts()
+        
+        # Update pie charts
+        self.update_pie_charts()
 
     def toggle_all_pings(self):
         """Toggle between stopping and starting all pings"""
@@ -615,7 +687,7 @@ class IPMonitorApp:
         if not save_path:
             return False
             
-        # Save IP addresses along with their notification settings
+        # Save IP addresses along with their notification settings and order
         try:
             ips_data = []
             for row in self.rows:
@@ -714,6 +786,9 @@ class IPMonitorApp:
             
             # Reset unsaved changes flag since we just loaded
             self.has_unsaved_changes = False
+            
+            # Update pie charts for loaded IPs
+            self.update_pie_charts()
             
             messagebox.showinfo("Success", f"IP list loaded from {load_path}")
             return True
@@ -852,11 +927,37 @@ class IPMonitorApp:
                         # Plot this IP's data
                         ax.plot(timestamps, response_times, marker='o', markersize=3, linestyle='-', label=ip)
                 else:
-                    # Single IP view, just plot its data
-                    timestamps = [item[0] for item in data]
-                    response_times = [item[2] if item[2] is not None else float('nan') for item in data]
+                    # Single IP view
+                    timestamps = []
+                    response_times = []
+                    failed_pings = []  # Store failed ping timestamps
                     
-                    ax.plot(timestamps, response_times, marker='o', markersize=4, linestyle='-', color='blue')
+                    for item in data:
+                        timestamps.append(item[0])
+                        if item[2] is not None:
+                            response_times.append(item[2])
+                        else:
+                            response_times.append(float('nan'))
+                            failed_pings.append(item[0])  # Track failed pings
+                    
+                    # Plot the line for successful pings
+                    ax.plot(timestamps, response_times, marker='o', markersize=4, linestyle='-', color='blue', label='Response Time')
+                    
+                    # Add red markers for failed pings at y=0
+                    if failed_pings:
+                        # Plot failed pings as red squares at the bottom of the chart
+                        y_min, y_max = ax.get_ylim()
+                        failed_y = [0] * len(failed_pings)  # Place at y=0
+                        ax.scatter(failed_pings, failed_y, color='red', marker='s', s=50, 
+                                 label='Failed Pings', zorder=5)
+                        
+                        # Add vertical red lines from bottom to indicate failures
+                        for failed_time in failed_pings:
+                            ax.axvline(x=failed_time, color='red', alpha=0.3, linewidth=1, linestyle='--')
+                    
+                    # Add legend if there are failed pings
+                    if failed_pings:
+                        ax.legend()
                 
                 # Set axis labels and title
                 ax.set_xlabel('Time')
@@ -895,7 +996,7 @@ class IPMonitorApp:
         """Show about dialog"""
         about_window = tk.Toplevel(self.root)
         about_window.title("About IP Monitor")
-        about_window.geometry("400x300")
+        about_window.geometry("400x320")
         about_window.resizable(False, False)
         about_window.transient(self.root)
         about_window.grab_set()
@@ -910,7 +1011,7 @@ class IPMonitorApp:
         
         # Add content
         tk.Label(about_window, text="IP Address Monitor", font=("Arial", 16, "bold")).pack(pady=10)
-        tk.Label(about_window, text="Version 1.2").pack()
+        tk.Label(about_window, text="Version 1.3").pack()
         ttk.Label(about_window, text="A tool for monitoring IP addresses and URLs").pack(pady=5)
         
         features = [
@@ -920,7 +1021,8 @@ class IPMonitorApp:
             "• Sound notifications for status changes",
             "• Save and load monitoring configurations",
             "• Export statistics to CSV files",
-            "• View ping history in graphs"
+            "• View ping history in graphs",
+            "• Reorder monitoring list with up/down"
         ]
         
         features_frame = ttk.Frame(about_window)
@@ -931,12 +1033,245 @@ class IPMonitorApp:
         
         tk.Button(about_window, text="Close", command=about_window.destroy).pack(pady=10)
 
+    def toggle_pie_charts(self):
+        """Toggle the display of pie charts"""
+        if self.show_pie_charts.get():
+            # Hide pie charts
+            self.show_pie_charts.set(False)
+            self.pie_frame.pack_forget()
+            self.pie_toggle_button.config(text="Show Pie Charts")
+        else:
+            # Show pie charts
+            self.show_pie_charts.set(True)
+            self.pie_frame.pack(fill="x", padx=10, pady=10)
+            self.update_pie_charts()
+            self.pie_toggle_button.config(text="Hide Pie Charts")
+
+    def update_pie_charts(self):
+        """Update or create pie charts for the first 4 monitored IPs"""
+        # Only update if pie charts are visible
+        if not self.show_pie_charts.get():
+            return
+            
+        # Clear existing pie charts
+        for chart in self.pie_charts:
+            chart.destroy()
+        self.pie_charts.clear()
+        
+        # Only show pie charts for the first 4 IPs
+        num_charts = min(len(self.rows), 4)
+        if num_charts == 0:
+            return
+            
+        # Calculate size based on window width (25% of window width total)
+        window_width = self.root.winfo_width()
+        if window_width < 100:  # Window not yet rendered
+            window_width = 1025  # Use default width
+            
+        total_width = window_width * 0.25
+        chart_size = int(total_width / num_charts) - 20  # Subtract padding
+        chart_size = min(chart_size, 195)  # Max size cap increased by 30% (150 * 1.3)
+        chart_size = max(chart_size, 104)   # Min size increased by 30% (80 * 1.3)
+        
+        # Apply 30% increase to calculated size
+        chart_size = int(chart_size * 1.3)
+        
+        # Create pie charts
+        for i in range(num_charts):
+            row = self.rows[i]
+            
+            # Create frame for each pie chart
+            chart_frame = tk.Frame(self.pie_frame)
+            chart_frame.pack(side="left", padx=5)
+            
+            # Create canvas for pie chart with extra height for label
+            canvas = tk.Canvas(chart_frame, width=chart_size, height=chart_size + 50,  # Increased height to accommodate larger chart
+                             highlightthickness=0, bg=self.root.cget('bg'))
+            canvas.pack()
+            
+            # Store reference to canvas in the row
+            row.pie_canvas = canvas
+            row.chart_size = chart_size
+            row.pie_items = {}  # Store canvas item IDs for updating
+            
+            # Draw initial pie chart
+            self.draw_pie_chart(row, initial=True)
+            
+            # Add IP label below the pie
+            label = tk.Label(chart_frame, text=row.ip, font=("Arial", 10))
+            label.pack()
+            
+            self.pie_charts.append(chart_frame)
+    
+    def draw_pie_chart(self, row, initial=False):
+        """Draw or update the pie chart for a specific row"""
+        if not hasattr(row, 'pie_canvas') or not self.show_pie_charts.get():
+            return
+            
+        # Check if update is already pending for this row
+        if not initial and hasattr(row, 'pie_update_pending') and row.pie_update_pending:
+            return
+            
+        # Mark update as pending
+        if not initial:
+            row.pie_update_pending = True
+        
+        # Schedule the actual draw
+        if initial:
+            self._do_draw_pie_chart(row, initial=True)
+        else:
+            self.root.after(100, lambda: self._do_draw_pie_chart(row))
+    
+    def _do_draw_pie_chart(self, row, initial=False):
+        """Actually draw the pie chart (internal method)"""
+        # Clear the pending flag
+        if hasattr(row, 'pie_update_pending'):
+            row.pie_update_pending = False
+        
+        if not hasattr(row, 'pie_canvas') or not self.show_pie_charts.get():
+            return
+            
+        canvas = row.pie_canvas
+        size = row.chart_size
+        
+        # Calculate center and radius - make it smaller to fit the ring
+        center_x = size // 2
+        center_y = size // 2
+        ring_width = 10
+        radius = (size // 2) - ring_width  # Exact size to touch the ring
+        
+        # Get extended history
+        extended_history = row.extended_history if hasattr(row, 'extended_history') else []
+        
+        # Initialize items dictionary if needed
+        if not hasattr(row, 'pie_items'):
+            row.pie_items = {}
+            row.last_history_length = 0
+            initial = True
+        
+        # Calculate statistics for ring color
+        ok_count = sum(1 for ping in extended_history if ping is True)
+        total_count = sum(1 for ping in extended_history if ping is not None)
+        
+        if total_count > 0:
+            ok_percentage = (ok_count / total_count) * 100
+            
+            # Determine ring color based on success rate
+            if ok_percentage == 100:
+                ring_color = "blue"
+            elif ok_percentage >= 65:
+                ring_color = "purple"
+            elif ok_percentage >= 45:
+                ring_color = "orange"
+            elif ok_percentage >= 15:
+                ring_color = "darkred"
+            elif ok_percentage >= 1:
+                ring_color = "lightcoral"
+            else:
+                ring_color = "red"
+        else:
+            ring_color = "gray"
+            ok_percentage = 0
+        
+        if initial:
+            # Create all elements for the first time
+            
+            # Create outer ring FIRST (so it's behind everything)
+            ring_id = canvas.create_oval(
+                center_x - radius, center_y - radius,
+                center_x + radius, center_y + radius,
+                outline=ring_color, width=ring_width, fill=""
+            )
+            row.pie_items['ring'] = ring_id
+            
+            # Create pie segments that go all the way to the center
+            for i in range(60):
+                start_angle = -90 + (i * 6)
+                extent = 6
+                
+                # Initial color
+                if i < len(extended_history):
+                    ping_result = extended_history[i]
+                    if ping_result is True:
+                        color = "green"
+                    elif ping_result is False:
+                        color = "red"
+                    else:
+                        color = "gray"
+                else:
+                    color = "gray"
+                
+                # Create arc without outline for solid appearance
+                arc_id = canvas.create_arc(
+                    center_x - radius, center_y - radius,
+                    center_x + radius, center_y + radius,
+                    start=start_angle, extent=extent,
+                    fill=color, outline="",  # No outline
+                    style=tk.PIESLICE
+                )
+                row.pie_items[f'arc_{i}'] = arc_id
+            
+            # Create percentage text on top with yellow bold font
+            text_id = canvas.create_text(
+                center_x, center_y,
+                text=f"{int(ok_percentage)}%", 
+                font=("Arial", 32, "bold"),  # Increased font size proportionally
+                fill="yellow"
+            )
+            row.pie_items['text'] = text_id
+            
+            # Store the current history length
+            row.last_history_length = len(extended_history)
+            
+        else:
+            # Update only what changed
+            
+            # Check if we have a new ping result (history grew)
+            current_length = len(extended_history)
+            if current_length > row.last_history_length:
+                # New ping added at position 0, update only the first slice
+                if extended_history:
+                    ping_result = extended_history[0]
+                    if ping_result is True:
+                        color = "green"
+                    elif ping_result is False:
+                        color = "red"
+                    else:
+                        color = "gray"
+                    
+                    # Update only the first arc (most recent ping)
+                    arc_id = row.pie_items.get('arc_0')
+                    if arc_id:
+                        canvas.itemconfig(arc_id, fill=color)
+                
+                row.last_history_length = current_length
+            
+            # Always update ring color and percentage as they depend on overall stats
+            ring_id = row.pie_items.get('ring')
+            if ring_id:
+                canvas.itemconfig(ring_id, outline=ring_color)
+            
+            # Update percentage text
+            text_id = row.pie_items.get('text')
+            if text_id:
+                canvas.itemconfig(text_id, text=f"{int(ok_percentage)}%")
+
+    def on_window_resize(self, event):
+        """Handle window resize events"""
+        # Cancel any existing timer
+        if hasattr(self, 'resize_timer') and self.resize_timer:
+            self.root.after_cancel(self.resize_timer)
+        
+        # Set a new timer to update pie charts after resize stops
+        self.resize_timer = self.root.after(500, self.update_pie_charts)
+
 
 class IPRow:
-    def __init__(self, parent, ip, global_stop_event, logging_enabled, ping_interval, app):
+    def __init__(self, parent, ip, global_stop_event, logging_enabled, ping_interval=None):
         """Initialize a row for monitoring an IP or URL"""
         self.ip = ip
         self.history = [None] * MAX_HISTORY
+        self.extended_history = []  # For pie chart (up to 60 entries)
         self.fastest = float('inf')
         self.slowest = 0
         self.total_time = 0
@@ -946,10 +1281,8 @@ class IPRow:
         self.logging_enabled = logging_enabled
         self.paused = False
         self.pause_event = threading.Event()
-        self.parent_app = app  # Store reference to parent app
+        self.parent_app = None  # Will be set by the parent app
         self.ping_interval = ping_interval  # Reference to the global ping interval
-        self.log_error_count = 0  # Track consecutive log errors
-        self.max_log_errors = 3  # Maximum consecutive errors before showing warning
         
         # Previous status for detecting changes (for notifications)
         self.prev_status = None
@@ -960,8 +1293,20 @@ class IPRow:
         # Create main frame
         self.frame = tk.Frame(parent)  # Changed to tk.Frame for background color support
         
+        # Add up/down arrow buttons at the left
+        arrow_frame = tk.Frame(self.frame)
+        arrow_frame.pack(side="left", padx=2)
+        
+        self.up_button = tk.Button(arrow_frame, text="▲", width=2, height=1, 
+                                 command=self.move_up, font=("Arial", 8))
+        self.up_button.pack()
+        
+        self.down_button = tk.Button(arrow_frame, text="▼", width=2, height=1,
+                                   command=self.move_down, font=("Arial", 8))
+        self.down_button.pack()
+        
         # IP address label (using tk.Label instead of ttk for consistent styling)
-        self.ip_label = tk.Label(self.frame, text=ip, width=18, anchor="w", 
+        self.ip_label = tk.Label(self.frame, text=ip, width=16, anchor="w", 
                                font=("Arial", 12, "bold"))
         self.ip_label.pack(side="left", padx=5)
 
@@ -1008,7 +1353,7 @@ class IPRow:
         self.bell_canvas.pack(side="left", padx=2)
         
         # Draw bell icon
-        self.bell_icon = self.bell_canvas.create_text(12, 12, text="🔔", font=("Arial", 12), 
+        self.bell_icon = self.bell_canvas.create_text(12, 12, text="🔕", font=("Arial", 12), 
                                                  fill="gray", tags="bell")
         
         # Create tooltip for bell icon
@@ -1019,6 +1364,16 @@ class IPRow:
         
         # Update bell icon appearance
         self.update_bell_icon()
+
+    def move_up(self):
+        """Request parent to move this row up"""
+        if self.parent_app:
+            self.parent_app.move_row_up(self)
+            
+    def move_down(self):
+        """Request parent to move this row down"""
+        if self.parent_app:
+            self.parent_app.move_row_down(self)
 
     def toggle_notifications(self, event=None):
         """Toggle sound notifications on/off"""
@@ -1032,12 +1387,12 @@ class IPRow:
     def update_bell_icon(self):
         """Update the bell icon appearance based on notification state"""
         if self.sound_notifications_enabled.get():
-            # Use a larger, bold font and bright green for better visibility
-            self.bell_canvas.itemconfig(self.bell_icon, fill="#00CC00", font=("Arial", 14, "bold"))
+            # Use bell emoji with larger, bold font and bright green for better visibility
+            self.bell_canvas.itemconfig(self.bell_icon, text="🔔", fill="#00CC00", font=("Arial", 14, "bold"))
             self.bell_canvas.tooltip.text = "Sound notifications enabled"
         else:
-            # Use normal size font and gray color for disabled state
-            self.bell_canvas.itemconfig(self.bell_icon, fill="gray", font=("Arial", 12))
+            # Use muted bell emoji with normal size font and gray color for disabled state
+            self.bell_canvas.itemconfig(self.bell_icon, text="🔕", fill="gray", font=("Arial", 12))
             self.bell_canvas.tooltip.text = "Sound notifications disabled"
 
     # CHANGE 10: Modified to better handle the bell notification for every ping status change
@@ -1052,9 +1407,9 @@ class IPRow:
         if status_changed and self.sound_notifications_enabled.get():
             try:
                 if current_status:  # Changed to successful ping
-                    winsound.MessageBeep(winsound.MB_OK)
+                    winsound.MessageBeep(winsound.MB_OK)  # This is correct
                 else:  # Changed to failed ping
-                    winsound.MessageBeep(winsound.MB_ICONERROR)
+                    winsound.MessageBeep(winsound.MB_ICONHAND)  # Use MB_ICONHAND instead of MB_ICONERROR
             except Exception as e:
                 print(f"Error playing sound: {e}")
         
@@ -1064,8 +1419,10 @@ class IPRow:
         # Update history and statistics
         if result is None:
             self.history.insert(0, False)
+            self.extended_history.insert(0, False)
         else:
             self.history.insert(0, True)
+            self.extended_history.insert(0, True)
             self.ping_count += 1
             self.total_time += result
             
@@ -1078,8 +1435,11 @@ class IPRow:
                 
                 self.slowest = max(self.slowest, result)
 
-        # Keep only MAX_HISTORY items
+        # Keep only MAX_HISTORY items for display circles
         self.history = self.history[:MAX_HISTORY]
+        
+        # Keep only 60 items for pie chart
+        self.extended_history = self.extended_history[:60]
 
         # Update history indicators
         for i, canvas in enumerate(self.circles):
@@ -1117,6 +1477,10 @@ class IPRow:
             
         # Update label color based on the last pings
         self.update_label_color()
+        
+        # Update pie chart if it exists
+        if hasattr(self, 'parent_app') and self.parent_app and hasattr(self, 'pie_canvas') and self.parent_app.show_pie_charts.get():
+            self.parent_app.draw_pie_chart(self, initial=False)
 
     def update_label_color(self):
         """Update the label color and row background based on the ping history"""
@@ -1195,10 +1559,7 @@ class IPRow:
                             "ok" if result else "fail",
                             f"{result*1000:.2f}" if result else "0"
                         ])
-                    # Reset error count on successful write
-                    self.log_error_count = 0
                 except PermissionError:
-                    self.log_error_count += 1
                     # If permission denied, try to create a new log file
                     try:
                         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_alt"
@@ -1221,20 +1582,11 @@ class IPRow:
                                 "ok" if result else "fail",
                                 f"{result*1000:.2f}" if result else "0"
                             ])
-                        # Reset error count on successful recovery
-                        self.log_error_count = 0
                     except Exception as e:
-                        # If we still can't write, show warning but DON'T disable logging
+                        # If we still can't write, just disable logging
                         print(f"Error writing to log file: {e}")
-                        if self.log_error_count >= self.max_log_errors:
-                            # Show warning after multiple failures
-                            if hasattr(self, 'parent_app') and self.parent_app and not self.parent_app.log_error_shown:
-                                self.parent_app.log_error_shown = True
-                                # Show error in main thread
-                                self.frame.after(0, lambda: messagebox.showwarning("Log File Error", 
-                                    f"Cannot write to log file for {self.ip}.\n"
-                                    "Check file permissions or disk space.\n"
-                                    "Logging remains enabled but may not be working."))
+                        if hasattr(self, 'parent_app') and self.parent_app:
+                            self.parent_app.logging_enabled.set(False)
                 except Exception as e:
                     print(f"Error writing to log file: {e}")
 
@@ -1275,12 +1627,12 @@ class IPRow:
     def reset_statistics(self):
         """Reset all statistics for this IP"""
         self.history = [None] * MAX_HISTORY
+        self.extended_history = []
         self.fastest = float('inf')
         self.slowest = 0
         self.total_time = 0
         self.ping_count = 0
         self.prev_status = None  # Reset status tracking for notifications
-        self.log_error_count = 0  # Reset log error count
         
         # Reset UI indicators
         for canvas in self.circles:
