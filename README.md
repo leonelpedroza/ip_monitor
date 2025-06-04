@@ -1,4 +1,14 @@
 # IP Monitor 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.7+-blue.svg" alt="Python Version">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-green.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
+</p>
+
+
 English Version
 ![](https://github.com/leonelpedroza/ip_monitor/blob/main/UKFlag.png)
 ## History 
@@ -12,10 +22,13 @@ I didn't create this program to perform a lengthy network monitoring process and
 I decided to publish it on GitHub after the LLM (or misnamed IA's), so fashionable today, reorganized and gave me the green light to my old Python program. After reviewing and commenting on the code more professionally, and standardizing it following the PEP 8 – Style Guide for Python Code.
 
 ## Introduction
-<img align="right" width="180" src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
-A powerful, lightweight utility for monitoring the status and response times of multiple IP addresses and domains in real-time.
 
-![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
+A powerful, lightweight utility for monitoring the status and response times of multiple IP addresses and domains in real-time.
+<p align="center">
+  <img src="Screenshot1_.png" alt="IP Monitor GUI" width="600">
+  <br>
+  <em>IP Monitor main window</em>
+</p>
 
  
 ## Overview
@@ -46,7 +59,11 @@ IP Address Monitor is a Python-based desktop application designed to provide rea
 
 •	**Persistent configuration** that saves monitored IPs and settings between.sessions
 
-![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
+<p align="center">
+  <img src="Screenshot2_.png" alt="IP Monitor GUI" width="600">
+  <br>
+  <em>IP Monitor - Histogram</em>
+</p>
 
 ## Requirements
 •	Python 3.6 or higher
@@ -106,10 +123,15 @@ Decidí publicarlo en GitHub después de que el LLM (o mal llamado IA), tan de m
 
 
 ## Introducción
-<img align="right" width="180" src="https://img.shields.io/badge/Python-Networking-blue?style=for-the-badge&logo=python&logoColor=white">
+
 Una utilidad potente y ligera para monitorear el estado y tiempos de respuesta de múltiples direcciones IP y dominios en tiempo real.
 
-![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot2.png)
+<p align="center">
+  <img src="Screenshot1_.png" alt="IP Monitor GUI" width="600">
+  <br>
+  <em>IP Monitor ventana principal</em>
+</p>
+
 
  
 ## Descripción general
@@ -138,7 +160,13 @@ Una utilidad potente y ligera para monitorear el estado y tiempos de respuesta d
 
 •	Configuración persistente que guarda las IPs monitoreadas y la configuración entre sesiones
 
-![](https://github.com/leonelpedroza/ip_monitor/blob/main/Screenshot1.png)
+
+<p align="center">
+  <img src="Screenshot2_.png" alt="IP Monitor GUI" width="600">
+  <br>
+  <em>IP Monitor - Histograma</em>
+</p>
+
 
 
 ## Requisitos
